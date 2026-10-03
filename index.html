@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="ELR Ballistics">
+<meta name="format-detection" content="telephone=no">
+<meta name="theme-color" content="#22303a">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" href="icon-192.png">
+<title>ELR Ballistics</title>
+<style>
+:root{--bg:#22303a;--panel:#2d3f4b;--line:#55707f;--ink:#fff;--soft:#e6eef3;--blaze:#ff8a1f;--sky:#9fdcff;--bad:#ffb3b3;--good:#b9f5b0;--field:#14202a}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{font-size:20px;-webkit-text-size-adjust:100%;background:var(--bg)}
+body{margin:0;min-width:320px;overflow-x:hidden;background:var(--bg);color:var(--ink);
+ font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;line-height:1.35;
+ padding:env(safe-area-inset-top,0px) env(safe-area-inset-right,0px) env(safe-area-inset-bottom,0px) env(safe-area-inset-left,0px)}
+.wrap{max-width:860px;margin:0 auto;padding:.6rem .7rem 2rem}
+h1{font-size:1.15rem;margin:.3rem 0 .6rem;font-weight:800}
+.bar{display:flex;gap:.4rem;flex-wrap:wrap;align-items:center;margin-bottom:.6rem}
+.bar select{flex:1 1 100%}
+.bar button{flex:1 1 28%;padding:12px 6px}
+label{display:block;font-size:.85rem;font-weight:600;margin:.45rem 0 .2rem}
+.hint{font-size:.72rem;color:var(--soft);font-weight:400}
+input,select{font:inherit;font-size:1rem;padding:12px;width:100%;min-height:48px;border-radius:8px;border:2px solid var(--line);
+ background:var(--field);color:#fff;font-variant-numeric:tabular-nums;-webkit-appearance:none;appearance:none}
+select{background-image:linear-gradient(45deg,transparent 50%,#fff 50%),linear-gradient(135deg,#fff 50%,transparent 50%);
+ background-position:calc(100% - 20px) 50%,calc(100% - 14px) 50%;background-size:6px 6px;background-repeat:no-repeat;padding-right:34px}
+input:disabled{opacity:.6}
+input:focus,select:focus,button:focus-visible,summary:focus-visible{outline:3px solid var(--sky);outline-offset:2px}
+button{font:inherit;font-size:.95rem;font-weight:800;min-height:48px;padding:12px 16px;border-radius:8px;border:2px solid var(--blaze);
+ background:var(--blaze);color:#1a1a1a;cursor:pointer;touch-action:manipulation}
+button.alt{background:transparent;color:#fff;border-color:var(--line)}
+button:active{filter:brightness(.85)}
+.pm{display:flex;gap:.35rem}
+.pm input{flex:1}
+.pm button{flex:0 0 3.2rem;padding:0;font-size:1.2rem}
+.dist{background:var(--panel);border-radius:12px;padding:.6rem;border:2px solid var(--line)}
+.distrow{display:flex;gap:.4rem;align-items:flex-end}
+.distrow .f{flex:1}
+.distrow select{width:7.5rem}
+#go{width:100%;margin-top:.6rem;font-size:1.1rem;min-height:56px}
+.answer{margin-top:.6rem;background:#15222c;border-radius:12px;padding:.7rem .7rem .5rem;border:3px solid var(--blaze)}
+.elev{font-size:2.6rem;font-weight:900;color:var(--blaze);line-height:1;font-variant-numeric:tabular-nums}
+.elev small{font-size:.9rem;color:#fff;font-weight:700;margin-left:.3rem}
+.mils{font-size:1.05rem;font-weight:700;margin:.25rem 0 .5rem}
+.wind{font-size:1.2rem;font-weight:800;color:var(--sky)}
+.parts{font-size:.8rem;color:var(--soft);margin:.15rem 0 .5rem}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(7.5rem,1fr));gap:.35rem}
+.cell{background:var(--panel);border-radius:8px;padding:.35rem .45rem}
+.cell b{display:block;font-size:.95rem;font-variant-numeric:tabular-nums}
+.cell span{font-size:.7rem;color:var(--soft)}
+.msg{font-size:.9rem;margin:.5rem 0;padding:.5rem .6rem;border-radius:8px;background:#3a2626;color:var(--bad);display:none}
+.note{font-size:.8rem;color:var(--soft);margin:.45rem 0}
+details{background:var(--panel);border-radius:12px;margin-top:.6rem;border:2px solid var(--line)}
+summary{font-size:1rem;font-weight:800;padding:.75rem .7rem;cursor:pointer;list-style:none;min-height:48px}
+summary::-webkit-details-marker{display:none}
+summary::after{content:"+";float:right;color:var(--blaze);font-size:1.2rem;line-height:1}
+details[open] summary::after{content:"\2212"}
+.body{padding:0 .7rem .8rem}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:0 .5rem}
+@media (max-width:430px){.two{grid-template-columns:1fr}}
+.check{display:flex;align-items:center;gap:.6rem;font-size:.9rem;font-weight:600;margin:.6rem 0;min-height:44px}
+.check input{width:1.5rem;height:1.5rem;min-height:0;padding:0;-webkit-appearance:checkbox;appearance:auto;accent-color:var(--blaze)}
+.tablewrap{overflow:auto;-webkit-overflow-scrolling:touch;margin-top:.5rem;max-height:70vh;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:.8rem;font-variant-numeric:tabular-nums}
+th,td{padding:.35rem .45rem;text-align:right;border-bottom:1px solid var(--line);white-space:nowrap}
+th{position:sticky;top:0;background:#15222c;font-size:.72rem;z-index:1}
+td.e{color:var(--blaze);font-weight:800}
+tr:nth-child(even) td{background:#283945}
+.row{display:flex;gap:.4rem;flex-wrap:wrap;margin-top:.6rem}
+.row button{flex:1 1 8rem}
+.status{font-size:.85rem;color:var(--good);margin-top:.45rem;min-height:1.2em}
+.offline{font-size:.8rem;margin-top:1rem;padding:.5rem .6rem;border-radius:8px;border:1px solid var(--line);color:var(--soft)}
+.offline.ok{color:var(--good);border-color:#4f7d4a}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>ELR Ballistics</h1>
+<div class="bar">
+  <select id="profile" aria-label="Saved rifle"></select>
+  <button type="button" class="alt" id="saveBtn">Save rifle</button>
+  <button type="button" class="alt" id="delBtn">Delete</button>
+  <button type="button" class="alt" id="newBtn">New rifle</button>
+</div>
+
+<div class="dist">
+  <div class="distrow">
+    <div class="f"><label for="dist">Target distance</label><input id="dist" type="text" inputmode="decimal" autocomplete="off" value="3.25"></div>
+    <div><label for="unit">Units</label><select id="unit"><option value="mi">miles</option><option value="yd">yards</option></select></div>
+  </div>
+  <button type="button" id="go">Calculate</button>
+</div>
+
+<div class="msg" id="err" role="alert"></div>
+<div class="answer" id="answer" aria-live="polite">
+  <div class="elev" id="oElev">&mdash; <small>MOA up</small></div>
+  <div class="mils" id="oMils">Press Calculate</div>
+  <div class="wind" id="oWind"></div>
+  <div class="parts" id="oParts"></div>
+  <div class="grid">
+    <div class="cell"><b id="oTof">&mdash;</b><span>Flight time</span></div>
+    <div class="cell"><b id="oVel">&mdash;</b><span>Impact velocity</span></div>
+    <div class="cell"><b id="oEn">&mdash;</b><span>Impact energy</span></div>
+    <div class="cell"><b id="oApex">&mdash;</b><span>Highest point above line of sight</span></div>
+    <div class="cell"><b id="oLaunch">&mdash;</b><span>Barrel angle above level</span></div>
+    <div class="cell"><b id="oSub">&mdash;</b><span>Goes subsonic at</span></div>
+    <div class="cell"><b id="oDA">&mdash;</b><span>Density altitude</span></div>
+    <div class="cell"><b id="oSg">&mdash;</b><span>Stability at muzzle (Miller Sg)</span></div>
+  </div>
+  <div class="note" id="oTrue"></div>
+</div>
+
+<details open><summary>Weather and altitude</summary><div class="body">
+  <div class="two">
+    <div><label for="altFt">Altitude (ft)</label><input id="altFt" type="text" inputmode="decimal" autocomplete="off"></div>
+    <div><label for="pressure">Station pressure (inHg) <span class="hint">actual, not sea-level</span></label><input id="pressure" type="text" inputmode="decimal" autocomplete="off"></div>
+  </div>
+  <label class="check"><input type="checkbox" id="stdP"> Use standard pressure for this altitude</label>
+  <div class="two">
+    <div><label for="tempF">Temperature (&deg;F)</label><div class="pm"><input id="tempF" type="text" inputmode="decimal" autocomplete="off"><button type="button" class="alt" data-neg="tempF" aria-label="Make temperature negative or positive">&plusmn;</button></div></div>
+    <div><label for="rh">Humidity (%)</label><input id="rh" type="text" inputmode="decimal" autocomplete="off"></div>
+  </div>
+</div></details>
+
+<details><summary>Wind, direction and angle</summary><div class="body">
+  <div class="two">
+    <div><label for="windMph">Wind speed (mph)</label><input id="windMph" type="text" inputmode="decimal" autocomplete="off"></div>
+    <div><label for="windClock">Wind coming from</label><select id="windClock">
+      <option value="12">12 o'clock (in your face)</option><option value="1">1 o'clock</option><option value="2">2 o'clock</option><option value="3">3 o'clock (from the right)</option><option value="4">4 o'clock</option><option value="5">5 o'clock</option><option value="6">6 o'clock (at your back)</option><option value="7">7 o'clock</option><option value="8">8 o'clock</option><option value="9">9 o'clock (from the left)</option><option value="10">10 o'clock</option><option value="11">11 o'clock</option></select></div>
+  </div>
+  <label class="check"><input type="checkbox" id="coriolis"> Include Coriolis (earth's spin)</label>
+  <div class="two">
+    <div><label for="azDeg">Shot direction (degrees) <span class="hint">0 N, 90 E, 180 S, 270 W</span></label><input id="azDeg" type="text" inputmode="decimal" autocomplete="off"></div>
+    <div><label for="latDeg">Latitude (degrees north)</label><div class="pm"><input id="latDeg" type="text" inputmode="decimal" autocomplete="off"><button type="button" class="alt" data-neg="latDeg" aria-label="Make latitude negative or positive">&plusmn;</button></div></div>
+  </div>
+  <label for="losDeg">Uphill/downhill angle (degrees) <span class="hint">+ uphill, &minus; downhill, 0 level</span></label>
+  <div class="pm"><input id="losDeg" type="text" inputmode="decimal" autocomplete="off"><button type="button" class="alt" data-neg="losDeg" aria-label="Switch uphill or downhill">&plusmn;</button></div>
+</div></details>
+
+<details id="rifleBox"><summary>Rifle and bullet</summary><div class="body">
+  <div class="status" id="rStatus"></div>
+  <div class="two">
+    <div><label for="mv">Muzzle velocity (fps)</label><input id="mv" type="text" inputmode="decimal" autocomplete="off"></div>
+    <div><label for="bc">Ballistic coefficient</label><input id="bc" type="text" inputmode="decimal" autocomplete="off"></div>
+    <div><label for="model">BC type</label><select id="model"><option value="G7">G7 (long boat-tail bullets)</option><option value="G1">G1</option></select></div>
+    <div><label for="grains">Bullet weight (grains)</label><input id="grains" type="text" inputmode="decimal" autocomplete="off"></div>
+    <div><label for="diaIn">Bullet diameter (in)</label><input id="diaIn" type="text" inputmode="decimal" autocomplete="off"></div>
+    <div><label for="lenIn">Bullet length (in)</label><input id="lenIn" type="text" inputmode="decimal" autocomplete="off"></div>
+    <div><label for="shIn">Sight height (in)</label><input id="shIn" type="text" inputmode="decimal" autocomplete="off"></div>
+    <div><label for="zeroYd">Zero distance (yd)</label><input id="zeroYd" type="text" inputmode="decimal" autocomplete="off"></div>
+    <div><label for="twistIn">Twist (1 turn in __ inches)</label><input id="twistIn" type="text" inputmode="decimal" autocomplete="off"></div>
+    <div><label for="rightTwist">Twist direction</label><select id="rightTwist"><option value="1">Right-hand</option><option value="0">Left-hand</option></select></div>
+  </div>
+  <p class="note">Bullet length is only used for stability and spin drift. Leave it blank if you don't know it; elevation is still calculated, but spin drift shows as zero.</p>
+</div></details>
+
+<details><summary>Truing to a real hit</summary><div class="body">
+  <p class="note">Set the weather and rifle above to match the day of a confirmed hit, enter that hit, then press True it. One hit can be matched two ways. They agree near the hit distance and spread apart farther away.</p>
+  <div class="two">
+    <div><label for="tDist">Confirmed hit distance (yd)</label><input id="tDist" type="text" inputmode="decimal" autocomplete="off"></div>
+    <div><label for="tMOA">Elevation that hit (MOA)</label><input id="tMOA" type="text" inputmode="decimal" autocomplete="off"></div>
+  </div>
+  <label for="tMethod">Use truing</label>
+  <select id="tMethod"><option value="none">Off (published BC)</option><option value="bc">Method A: adjust BC</option><option value="scale">Method B: scale factor (scope/rail reads high or low)</option></select>
+  <div class="row"><button type="button" id="trueBtn">True it</button></div>
+  <div class="status" id="tStatus"></div>
+</div></details>
+
+<details><summary>Dope table</summary><div class="body">
+  <div class="two">
+    <div><label for="dStart">From (yd)</label><input id="dStart" type="text" inputmode="decimal" autocomplete="off" value="100"></div>
+    <div><label for="dEnd">To (yd)</label><input id="dEnd" type="text" inputmode="decimal" autocomplete="off" value="8800"></div>
+  </div>
+  <label for="dStep">Every (yd)</label><input id="dStep" type="text" inputmode="decimal" autocomplete="off" value="5">
+  <div class="row">
+    <button type="button" id="tableBtn">Build table</button>
+    <button type="button" class="alt" id="shareBtn">Share or save CSV</button>
+    <button type="button" class="alt" id="copyBtn">Copy for Sheets</button>
+  </div>
+  <div class="status" id="dStatus"></div>
+  <p class="note">Barrel angle is how far the bore points above level, the reading an inclinometer gives on a surface parallel to the bore, such as the receiver. A tapered scope rail reads lower by the rail's built-in MOA (20 MOA = 0.33&deg;, 40 MOA = 0.67&deg;).</p>
+  <div class="tablewrap"><table id="dope"></table></div>
+</div></details>
+
+<p class="note">Point-mass solver with standard G1/G7 drag, air that thins as the bullet climbs, Litz spin drift and full Coriolis. Elevation is solved as the barrel-angle change from your zero. With the .375 preset it matches a separately written solver within 0.25 MOA out to 3.25 miles and 1.6 MOA at 5 miles. Real holds at extreme range have run higher than any solver, so true it to your own hits.</p>
+<div class="offline" id="offline">Checking offline status&hellip;</div>
+</div>
+<script id="engine">
+const DRAG_TABLES={"g7":[[0.0,0.1198],[0.05,0.1197],[0.1,0.1196],[0.15,0.1194],[0.2,0.1193],[0.25,0.1194],[0.3,0.1194],[0.35,0.1194],[0.4,0.1193],[0.45,0.1193],[0.5,0.1194],[0.55,0.1193],[0.6,0.1194],[0.65,0.1197],[0.7,0.1202],[0.725,0.1207],[0.75,0.1215],[0.775,0.1226],[0.8,0.1242],[0.825,0.1266],[0.85,0.1306],[0.875,0.1368],[0.9,0.1464],[0.925,0.166],[0.95,0.2054],[0.975,0.2993],[1.0,0.3803],[1.025,0.4015],[1.05,0.4043],[1.075,0.4034],[1.1,0.4014],[1.125,0.3987],[1.15,0.3955],[1.2,0.3884],[1.25,0.381],[1.3,0.3732],[1.35,0.3657],[1.4,0.358],[1.5,0.344],[1.55,0.3376],[1.6,0.3315],[1.65,0.326],[1.7,0.3209],[1.75,0.316],[1.8,0.3117],[1.85,0.3078],[1.9,0.3042],[1.95,0.301],[2.0,0.298],[2.05,0.2951],[2.1,0.2922],[2.15,0.2892],[2.2,0.2864],[2.25,0.2835],[2.3,0.2807],[2.35,0.2779],[2.4,0.2752],[2.45,0.2725],[2.5,0.2697],[2.55,0.267],[2.6,0.2643],[2.65,0.2615],[2.7,0.2588],[2.75,0.2561],[2.8,0.2533],[2.85,0.2506],[2.9,0.2479],[2.95,0.2451],[3.0,0.2424],[3.1,0.2368],[3.2,0.2313],[3.3,0.2258],[3.4,0.2205],[3.5,0.2154],[3.6,0.2106],[3.7,0.206],[3.8,0.2017],[3.9,0.1975],[4.0,0.1935],[4.2,0.1861],[4.4,0.1793],[4.6,0.173],[4.8,0.1672],[5.0,0.1618]],"g1":[[0.0,0.2629],[0.05,0.2558],[0.1,0.2487],[0.15,0.2413],[0.2,0.2344],[0.25,0.2278],[0.3,0.2214],[0.35,0.2155],[0.4,0.2104],[0.45,0.2061],[0.5,0.2032],[0.55,0.202],[0.6,0.2034],[0.7,0.2165],[0.725,0.223],[0.75,0.2313],[0.775,0.2417],[0.8,0.2546],[0.825,0.2706],[0.85,0.2901],[0.875,0.3136],[0.9,0.3415],[0.925,0.3734],[0.95,0.4084],[0.975,0.4448],[1.0,0.4805],[1.025,0.5136],[1.05,0.5427],[1.075,0.5677],[1.1,0.5883],[1.125,0.6053],[1.15,0.6191],[1.2,0.6393],[1.25,0.6518],[1.3,0.6589],[1.35,0.6621],[1.4,0.6625],[1.45,0.6607],[1.5,0.6573],[1.55,0.6528],[1.6,0.6474],[1.65,0.6413],[1.7,0.6347],[1.75,0.628],[1.8,0.621],[1.85,0.6141],[1.9,0.6072],[1.95,0.6003],[2.0,0.5934],[2.05,0.5867],[2.1,0.5804],[2.15,0.5743],[2.2,0.5685],[2.25,0.563],[2.3,0.5577],[2.35,0.5527],[2.4,0.5481],[2.45,0.5438],[2.5,0.5397],[2.6,0.5325],[2.7,0.5264],[2.8,0.5211],[2.9,0.5168],[3.0,0.5133],[3.1,0.5105],[3.2,0.5084],[3.3,0.5067],[3.4,0.5054],[3.5,0.504],[3.6,0.503],[3.7,0.5022],[3.8,0.5016],[3.9,0.501],[4.0,0.5006],[4.2,0.4998],[4.4,0.4995],[4.6,0.4992],[4.8,0.499],[5.0,0.4988]]};
+const G = 9.80665, RD = 287.058, LAPSE = 0.0065, OMEGA = 7.292115e-5;
+function pchipMake(tab){
+  const x = tab.map(p=>p[0]), y = tab.map(p=>p[1]), n = x.length, h=[], d=[], m=new Array(n);
+  for (let i=0;i<n-1;i++){ h[i]=x[i+1]-x[i]; d[i]=(y[i+1]-y[i])/h[i]; }
+  m[0]=d[0]; m[n-1]=d[n-2];
+  for (let i=1;i<n-1;i++){
+    if (d[i-1]*d[i] <= 0) m[i]=0;
+    else { const w1=2*h[i]+h[i-1], w2=h[i]+2*h[i-1]; m[i]=(w1+w2)/(w1/d[i-1]+w2/d[i]); }
+  }
+  return function(v){
+    if (v<=x[0]) return y[0]; if (v>=x[n-1]) return y[n-1];
+    let lo=0, hi=n-1; while (hi-lo>1){ const mid=(lo+hi)>>1; if (x[mid]>v) hi=mid; else lo=mid; }
+    const t=(v-x[lo])/h[lo], t2=t*t, t3=t2*t;
+    return (2*t3-3*t2+1)*y[lo]+(t3-2*t2+t)*h[lo]*m[lo]+(-2*t3+3*t2)*y[hi]+(t3-t2)*h[lo]*m[hi];
+  };
+}
+const CD = { G7: pchipMake(DRAG_TABLES.g7), G1: pchipMake(DRAG_TABLES.g1) };
+function airAt(pInHg, tF, rh){
+  const T=(tF-32)*5/9+273.15, P=pInHg*3386.389;
+  const es=6.1078*Math.pow(10,7.5*(T-273.15)/(T-273.15+237.3))*100, pv=(rh/100)*es;
+  return { rho:(P-pv)/(RD*T)+pv/(461.495*T), T };
+}
+function densityAltitudeFt(rho){ const ratio=rho/1.225; return (1-Math.pow(ratio,1/4.2559))/6.8756e-6; }
+function standardPressureInHg(altFt){ return 29.92126*Math.pow(1-6.8756e-6*altFt,5.2559); }
+function fly(c, angle, R, full){
+  const V0=c.mv, ct=Math.cos(c.losRad), st=Math.sin(c.losRad);
+  let x=0, y=-c.sh, z=0, vx=V0*Math.cos(angle), vy=V0*Math.sin(angle), vz=0, t=0, apex=-c.sh;
+  const dt = R < 500 ? 0.0005 : 0.002, wx=c.wx, wz=c.wz, ox=c.ox, oy=c.oy, oz=c.oz, k=c.k, cdf=c.cdf, T0=c.T0, rho0=c.rho0, ex=c.expo;
+  const gx=-G*st, gy=-G*ct;
+  let mach1=null, mach12=null;
+  function acc(px,py,ux,uy,uz,out){
+    const h=px*st+py*ct, T=T0-LAPSE*h, rho=rho0*Math.pow(T/T0,ex), a=Math.sqrt(1.4*RD*T);
+    const rx=ux-wx, ry=uy, rz=uz-wz, v=Math.sqrt(rx*rx+ry*ry+rz*rz), d=rho*v*cdf(v/a)*k;
+    out[0]=-d*rx + gx - 2*(oy*uz-oz*uy);
+    out[1]=-d*ry + gy - 2*(oz*ux-ox*uz);
+    out[2]=-d*rz      - 2*(ox*uy-oy*ux);
+    out[3]=v/a;
+  }
+  const a1=[0,0,0,0],a2=[0,0,0,0],a3=[0,0,0,0],a4=[0,0,0,0];
+  let steps=0;
+  while (true){
+    acc(x,y,vx,vy,vz,a1);
+    acc(x+vx*dt/2, y+vy*dt/2, vx+a1[0]*dt/2, vy+a1[1]*dt/2, vz+a1[2]*dt/2, a2);
+    const bx=vx+a1[0]*dt/2, by=vy+a1[1]*dt/2, bz=vz+a1[2]*dt/2;
+    acc(x+bx*dt/2, y+by*dt/2, vx+a2[0]*dt/2, vy+a2[1]*dt/2, vz+a2[2]*dt/2, a3);
+    const cx=vx+a2[0]*dt/2, cy=vy+a2[1]*dt/2, cz=vz+a2[2]*dt/2;
+    acc(x+cx*dt, y+cy*dt, vx+a3[0]*dt, vy+a3[1]*dt, vz+a3[2]*dt, a4);
+    const dxv=vx+a3[0]*dt, dyv=vy+a3[1]*dt, dzv=vz+a3[2]*dt;
+    const nx=x+dt*(vx+2*bx+2*cx+dxv)/6, ny=y+dt*(vy+2*by+2*cy+dyv)/6, nz=z+dt*(vz+2*bz+2*cz+dzv)/6;
+    const nvx=vx+dt*(a1[0]+2*a2[0]+2*a3[0]+a4[0])/6, nvy=vy+dt*(a1[1]+2*a2[1]+2*a3[1]+a4[1])/6, nvz=vz+dt*(a1[2]+2*a2[2]+2*a3[2]+a4[2])/6;
+    if (full){ if (mach12===null && a1[3]<1.2) mach12=x; if (mach1===null && a1[3]<1.0) mach1=x; }
+    if (nx>=R){
+      const f=(R-x)/(nx-x), V=Math.hypot(vx+f*(nvx-vx), vy+f*(nvy-vy), vz+f*(nvz-vz));
+      return { y:y+f*(ny-y), z:z+f*(nz-z), t:t+f*dt, v:V, apex:Math.max(apex,y), mach1, mach12, ok:true };
+    }
+    x=nx; y=ny; z=nz; vx=nvx; vy=nvy; vz=nvz; t+=dt; if (y>apex) apex=y;
+    if (++steps>200000 || nvx<=0) return { ok:false, y:-1e9 };
+  }
+}
+function setup(inp, opts){
+  const air=airAt(inp.pressure, inp.tempF, inp.rh);
+  const bc=(opts&&opts.bc)||inp.bc;
+  const losRad=((opts&&opts.level)?0:(inp.losDeg||0))*Math.PI/180;
+  const noEnv=opts&&opts.zero;
+  const W=noEnv?0:(inp.windMph||0)*0.44704, al=(inp.windClock||0)*Math.PI/6;
+  let ox=0, oy=0, oz=0;
+  if (!noEnv && inp.coriolis){
+    const phi=inp.latDeg*Math.PI/180, A=inp.azDeg*Math.PI/180;
+    const Od=OMEGA*Math.cos(phi)*Math.cos(A), Ou=OMEGA*Math.sin(phi), Or=-OMEGA*Math.cos(phi)*Math.sin(A);
+    const ct=Math.cos(losRad), st=Math.sin(losRad);
+    ox=ct*Od+st*Ou; oy=-st*Od+ct*Ou; oz=Or;
+  }
+  return { mv:inp.mv*0.3048, sh:inp.shIn*0.0254, losRad, rho0:air.rho, T0:air.T, expo:G/(RD*LAPSE)-1,
+    k:Math.PI/(8*bc*703.0696), cdf:CD[inp.model], wx:-W*Math.cos(al), wz:-W*Math.sin(al), ox, oy, oz };
+}
+function solveAngle(c, R, guess){
+  const f=a=>fly(c,a,R).y;
+  let a0=(guess!=null)?guess:0.0005, f0=f(a0);
+  let lo, hi, flo, fhi;
+  if (f0<0){ lo=a0; flo=f0; let step=Math.max(0.002, a0*0.05);
+    while (true){ hi=lo+step; fhi=f(hi); if (fhi>=0) break; if (fhi<flo) return null; lo=hi; flo=fhi; step*=1.6; if (hi>0.9) return null; } }
+  else { hi=a0; fhi=f0; let step=Math.max(0.002, a0*0.05);
+    while (true){ lo=hi-step; flo=f(lo); if (flo<0) break; hi=lo; fhi=flo; step*=1.6; if (lo<-0.5) return null; } }
+  for (let i=0;i<60;i++){
+    const m=hi-fhi*(hi-lo)/(fhi-flo), fm=f(m);
+    if (Math.abs(fm)<1e-5 || Math.abs(hi-lo)<1e-10) return m;
+    if (fm<0){ lo=m; flo=fm; fhi/=2; } else { hi=m; fhi=fm; flo/=2; }
+  }
+  return (lo+hi)/2;
+}
+
+// Faster barrel-angle solve: secant steps from a good starting guess, with the original
+// bracketing search kept as a fallback. Physics (fly) is unchanged.
+function solveAngleFast(c, R, guess){
+  const f=a=>fly(c,a,R).y;
+  if (guess==null) return solveAngle(c,R,guess);
+  let a0=guess, f0=f(a0), a1=guess+2e-5, f1=f(a1);
+  for (let i=0;i<12;i++){
+    if (!isFinite(f0)||!isFinite(f1)||f1===f0) break;
+    const a2=a1-f1*(a1-a0)/(f1-f0);
+    if (!(a2>-0.5&&a2<0.9)) break;
+    const f2=f(a2);
+    if (Math.abs(f2)<1e-4) return a2;   // within 0.1 mm of the line of sight
+    a0=a1; f0=f1; a1=a2; f1=f2;
+  }
+  return solveAngle(c,R,guess);
+}
+function millerSg(inp){
+  const d=inp.diaIn, l=inp.lenIn/d, t=inp.twistIn/d;
+  if (!(l>0)||!(t>0)) return null;
+  let sg=30*inp.grains/(t*t*d*d*d*l*(1+l*l));
+  sg*=Math.cbrt(inp.mv/2800); sg*=((inp.tempF+460)/519)*(29.92/inp.pressure);
+  return sg;
+}
+const RAD2MOA=180/Math.PI*60;
+function computeZero(inp, bc){ const c0=setup(inp,{bc, zero:true, level:true}); return solveAngle(c0, inp.zeroYd*0.9144, 0.001); }
+function solveShot(inp, Ryd, o){
+  o=o||{}; const bc=o.bc||inp.bc, R=Ryd*0.9144;
+  const z0=(o.z0!=null)?o.z0:computeZero(inp,bc);
+  const c=setup(inp,{bc});
+  const a=solveAngleFast(c,R,o.guess);
+  if (a==null||z0==null) return { ok:false, R:Ryd };
+  const s=fly(c,a,R,true);
+  // Separate wind and Coriolis pieces only when they exist and are wanted (skipped for tables).
+  let sw={z:s.z}, sc={z:0};
+  if (!o.fast){
+    if (inp.coriolis) sw=fly(setup(Object.assign({},inp,{coriolis:false}),{bc}),a,R);
+    if (inp.windMph>0) sc=fly(setup(Object.assign({},inp,{windMph:0}),{bc}),a,R);
+    else if (inp.coriolis) sc={z:s.z};
+  }
+  const sg=millerSg(inp), spinIn=(sg!=null)?1.25*(sg+1.2)*Math.pow(s.t,1.83)*(inp.rightTwist?1:-1):0;
+  const toMOA=zm=>Math.atan(zm/R)*RAD2MOA;
+  const windM=sw.z, corM=sc.z, totalZ=s.z+spinIn*0.0254;
+  return { ok:true, R:Ryd, angle:a, z0, elevMOA:(a-z0)*RAD2MOA, launchDeg:(a*180/Math.PI)+(inp.losDeg||0),
+    windMOA:toMOA(totalZ), windOnlyMOA:toMOA(windM), corH:toMOA(corM), spinMOA:toMOA(spinIn*0.0254),
+    tof:s.t, vel:s.v/0.3048, energy:inp.grains*Math.pow(s.v/0.3048,2)/450436, apexFt:s.apex/0.3048,
+    subsonicYd:s.mach1!=null?s.mach1/0.9144:null, transYd:s.mach12!=null?s.mach12/0.9144:null, sg };
+}
+
+</script>
+<script>
+// ---------- Truing (Method A): find the BC that reproduces a confirmed hit ----------
+function trueBC(inp, Ryd, actualMOA){
+  let lo=Math.max(0.03, inp.bc*0.3), hi=inp.bc*2.5, guess=null;
+  const d=b=>{ const r=solveShot(inp,Ryd,{bc:b,guess,fast:true}); if(r.ok){ guess=r.angle; return r.elevMOA; } guess=null; return Infinity; };
+  for (let i=0;i<40;i++){ const m=(lo+hi)/2; if (d(m)>actualMOA) lo=m; else hi=m; }
+  return (lo+hi)/2;
+}
+
+// ---------- Screen ----------
+const FIELDS=['altFt','pressure','tempF','rh','windMph','windClock','azDeg','latDeg','losDeg','mv','bc','model','grains','diaIn','lenIn','shIn','zeroYd','twistIn','rightTwist','tDist','tMOA','tMethod'];
+const CHECKS=['stdP','coriolis'];
+const PRESETS={
+ ".375 CheyTac — Cutting Edge 350 gr":{altFt:7200,pressure:23.0,stdP:false,tempF:55,rh:0,windMph:0,windClock:3,coriolis:false,azDeg:180,latDeg:43,losDeg:0,mv:3266,bc:0.414,model:'G7',grains:350,diaIn:0.375,lenIn:2.078,shIn:3.2,zeroYd:100,twistIn:10,rightTwist:'1',tDist:'',tMOA:'',tMethod:'none'},
+ ".416 Barrett — Cutting Edge 422 gr MTAC":{altFt:7400,pressure:22.74,stdP:true,tempF:65,rh:40,windMph:0,windClock:3,coriolis:false,azDeg:180,latDeg:43,losDeg:0,mv:3300,bc:0.410,model:'G7',grains:422,diaIn:0.416,lenIn:1.976,shIn:2.75,zeroYd:100,twistIn:9,rightTwist:'1',tDist:7744,tMOA:1092,tMethod:'none'},
+ "6.5 Creedmoor — Hornady 147 ELD-M":{altFt:7400,pressure:22.74,stdP:true,tempF:75,rh:0,windMph:0,windClock:3,coriolis:false,azDeg:180,latDeg:43,losDeg:0,mv:2750,bc:0.351,model:'G7',grains:147,diaIn:0.264,lenIn:0,shIn:2.75,zeroYd:100,twistIn:7.75,rightTwist:'1',tDist:'',tMOA:'',tMethod:'none'}
+};
+const $=id=>document.getElementById(id);
+const state={trued:null};
+let store={profiles:{},last:null};
+function loadStore(){ try{ const s=localStorage.getItem('elrBallistics'); if(s) store=JSON.parse(s)||store; }catch(e){} if(!store.profiles) store.profiles={}; }
+function saveStore(){ try{ localStorage.setItem('elrBallistics',JSON.stringify(store)); }catch(e){} }
+function allProfiles(){ return Object.assign({},PRESETS,store.profiles); }
+function fillProfiles(sel){
+  const p=$('profile'); p.innerHTML='';
+  Object.keys(allProfiles()).forEach(n=>{ const o=document.createElement('option'); o.value=n; o.textContent=n+(store.profiles[n]?' (saved)':''); p.appendChild(o); });
+  if(sel && allProfiles()[sel]) p.value=sel;
+}
+function setForm(v){
+  FIELDS.forEach(f=>{ if(v[f]!==undefined && v[f]!==null && $(f)) $(f).value=v[f]; });
+  CHECKS.forEach(f=>{ if(v[f]!==undefined) $(f).checked=!!v[f]; });
+  state.trued=v.trued||null;
+  syncStdP(); showTrue();
+}
+function getForm(){
+  const v={};
+  FIELDS.forEach(f=>v[f]=$(f).value);
+  CHECKS.forEach(f=>v[f]=$(f).checked);
+  v.trued=state.trued; v.dist=$('dist').value; v.unit=$('unit').value; v.profile=$('profile').value;
+  return v;
+}
+// Accepts "3.25", "3,25", "−12" (typographic minus) and leading/trailing spaces.
+function parseNum(s){ return parseFloat(String(s).trim().replace(/\u2212/g,'-').replace(',','.')); }
+function num(id,name,min,max){
+  const v=parseNum($(id).value);
+  const bad=m=>Object.assign(new Error(m),{field:id});
+  if(!isFinite(v)) throw bad(name+' is missing.');
+  if(v<min||v>max) throw bad(name+' should be between '+min+' and '+max+'.');
+  return v;
+}
+// Show an error; if it's about a specific box, open its section and take you to it.
+function fail(x){
+  err(x.message);
+  if(x.field && $(x.field)){ const el=$(x.field), d=el.closest('details'); if(d) d.open=true; el.focus(); el.scrollIntoView({block:'center'}); }
+}
+function syncStdP(){
+  if($('stdP').checked){ const a=parseNum($('altFt').value); if(isFinite(a)) $('pressure').value=standardPressureInHg(a).toFixed(2); $('pressure').disabled=true; }
+  else $('pressure').disabled=false;
+}
+function readInputs(){
+  syncStdP();
+  return { altFt:num('altFt','Altitude',-2000,20000), pressure:num('pressure','Station pressure',10,32), tempF:num('tempF','Temperature',-40,130), rh:num('rh','Humidity',0,100),
+    windMph:num('windMph','Wind speed',0,60), windClock:parseFloat($('windClock').value), coriolis:$('coriolis').checked,
+    azDeg:num('azDeg','Shot direction',0,360), latDeg:num('latDeg','Latitude',-90,90), losDeg:num('losDeg','Uphill/downhill angle',-60,60),
+    mv:num('mv','Muzzle velocity',500,5000), bc:num('bc','Ballistic coefficient',0.03,2), model:$('model').value, grains:num('grains','Bullet weight',10,2000),
+    diaIn:num('diaIn','Bullet diameter',0.1,1), lenIn:parseNum($('lenIn').value)||0, shIn:num('shIn','Sight height',0,10), zeroYd:num('zeroYd','Zero distance',25,2000),
+    twistIn:num('twistIn','Twist',3,40), rightTwist:$('rightTwist').value==='1' };
+}
+function distYd(){ const d=parseNum($('dist').value); if(!(d>0)) throw new Error('Enter a target distance.'); return $('unit').value==='mi'?d*1760:d; }
+function err(m){ const e=$('err'); if(m){ e.textContent=m; e.style.display='block'; } else e.style.display='none'; }
+const f1=x=>nz(x,1).toLocaleString(undefined,{minimumFractionDigits:1,maximumFractionDigits:1});
+const f0=x=>Math.round(x).toLocaleString();
+// avoid showing "-0.0" for values that round to zero
+const nz=(x,d)=>Math.abs(x)<0.5*Math.pow(10,-d)?0:x;
+function trueOpts(inp){
+  const m=$('tMethod').value, t=state.trued;
+  if(m==='bc' && t && t.bc) return {bc:t.bc, scale:1, label:'Trued, method A (BC '+t.bc.toFixed(3)+')'};
+  if(m==='scale' && t && t.scale) return {bc:inp.bc, scale:t.scale, label:'Trued, method B (×'+t.scale.toFixed(4)+')'};
+  return {bc:inp.bc, scale:1, label:''};
+}
+function showTrue(){
+  const t=state.trued, s=$('tStatus');
+  if(!t){ s.textContent=''; return; }
+  s.textContent='Trued to '+f0(t.dist)+' yd at '+f1(t.moa)+' MOA. Method A BC: '+t.bc.toFixed(3)+' (published '+t.bc0.toFixed(3)+'). Method B factor: ×'+t.scale.toFixed(4)+'.';
+}
+function windText(moa){
+  if(Math.abs(moa)<0.05) return 'No windage';
+  return 'Windage: dial '+f1(Math.abs(moa))+' MOA '+(moa>0?'left':'right')+'  ('+(Math.abs(moa)/3.43775).toFixed(1)+' mils)';
+}
+function remember(){ store.last=getForm(); saveStore(); }
+
+function calc(){
+  err('');
+  try{
+    if(document.activeElement && document.activeElement.blur) document.activeElement.blur(); // drop the iPhone keyboard
+    const inp=readInputs(), R=distYd(), to=trueOpts(inp);
+    $('oMils').textContent='Working…';
+    setTimeout(()=>{
+      try{
+        const s=solveShot(inp,R,{bc:to.bc});
+        if(!s.ok){ err('That distance is beyond what this bullet can reach in these conditions.'); $('oMils').textContent=''; return; }
+        const e=s.elevMOA*to.scale;
+        $('oElev').innerHTML=f1(e)+' <small>MOA up</small>';
+        $('oMils').textContent=nz(e/3.43775,1).toFixed(1)+' mils  •  '+f0(R)+' yd ('+(R/1760).toFixed(2)+' mi)';
+        $('oWind').textContent=windText(s.windMOA);
+        const parts=[]; if(inp.windMph>0) parts.push('wind '+f1(Math.abs(s.windOnlyMOA))+(s.windOnlyMOA>0?' R':' L'));
+        parts.push('spin drift '+f1(Math.abs(s.spinMOA))+(s.spinMOA>0?' R':' L'));
+        if(inp.coriolis) parts.push('Coriolis '+f1(Math.abs(s.corH))+(s.corH>0?' R':' L'));
+        $('oParts').textContent='Bullet drifts: '+parts.join(', ');
+        $('oTof').textContent=s.tof.toFixed(2)+' s'; $('oVel').textContent=f0(s.vel)+' fps'; $('oEn').textContent=f0(s.energy)+' ft-lb';
+        $('oApex').textContent=f0(s.apexFt)+' ft'; $('oLaunch').textContent=s.launchDeg.toFixed(2)+'°';
+        $('oSub').textContent=s.subsonicYd?f0(s.subsonicYd)+' yd':'stays supersonic';
+        $('oDA').textContent=f0(densityAltitudeFt(airAt(inp.pressure,inp.tempF,inp.rh).rho))+' ft';
+        $('oSg').textContent=s.sg?s.sg.toFixed(2):'enter bullet length';
+        $('oTrue').textContent=to.label?to.label:'Untrued (published BC).';
+        $('answer').scrollIntoView({behavior:'smooth',block:'nearest'});
+        remember();
+      }catch(x){ err(x.message); $('oMils').textContent=''; }
+    },20);
+  }catch(x){ fail(x); }
+}
+function doTrue(){
+  err('');
+  try{
+    const inp=readInputs(), d=parseNum($('tDist').value), m=parseNum($('tMOA').value);
+    if(!(d>0)||!(m>0)) throw new Error('Enter the confirmed hit distance and the elevation that hit.');
+    $('tStatus').textContent='Truing… this can take several seconds.';
+    setTimeout(()=>{
+      try{
+        const base=solveShot(inp,d); if(!base.ok) throw new Error('That hit distance is beyond reach with the published BC.');
+        const bc=trueBC(inp,d,m);
+        state.trued={dist:d,moa:m,bc,bc0:inp.bc,scale:m/base.elevMOA};
+        if($('tMethod').value==='none') $('tMethod').value='bc';
+        showTrue(); remember();
+      }catch(x){ $('tStatus').textContent=''; err(x.message); }
+    },20);
+  }catch(x){ fail(x); }
+}
+let tableRows=[], building=false;
+function buildTable(){
+  err('');
+  if(building) return;
+  try{
+    const inp=readInputs(), to=trueOpts(inp);
+    const a=parseNum($('dStart').value), b=parseNum($('dEnd').value), st=parseNum($('dStep').value);
+    if(!(a>0&&b>=a&&st>0)) throw new Error('Check the table range: From, To and Every must be positive, with To at least From.');
+    const n=Math.floor((b-a)/st+1e-9)+1; if(n>2000) throw new Error('That table would have '+n+' rows. Use a larger step (2,000 rows maximum).');
+    const z0=computeZero(inp,to.bc); tableRows=[]; let guess=null, prev=null, R=a;
+    const tb=$('dope'); tb.innerHTML='<tr><th>Yards</th><th>Miles</th><th>Elev MOA</th><th>Elev mils</th><th>Windage MOA</th><th>Flight s</th><th>Impact fps</th><th>Barrel angle °</th></tr>';
+    building=true; $('tableBtn').disabled=true; $('dStatus').textContent='Building…';
+    const chunk=()=>{
+      const t0=Date.now(), frag=document.createDocumentFragment();
+      while(R<=b+1e-9 && Date.now()-t0<80){
+        // start each row's search from a straight-line extension of the last two rows
+        const g=(guess!=null&&prev!=null)?guess+(guess-prev):guess;
+        const s=solveShot(inp,R,{bc:to.bc,z0,guess:g,fast:true});
+        if(!s.ok){ tableRows.push({R,end:true}); R=b+1; break; }
+        prev=guess; guess=s.angle; const e=s.elevMOA*to.scale;
+        const row={R,mi:R/1760,e,mil:e/3.43775,w:s.windMOA,t:s.tof,v:s.vel,ang:s.launchDeg}; tableRows.push(row);
+        const tr=document.createElement('tr');
+        tr.innerHTML='<td>'+f0(R)+'</td><td>'+row.mi.toFixed(3)+'</td><td class="e">'+f1(e)+'</td><td>'+nz(row.mil,2).toFixed(2)+'</td><td>'+(Math.abs(row.w)<0.05?'0.0':f1(Math.abs(row.w))+(row.w>0?' L':' R'))+'</td><td>'+row.t.toFixed(2)+'</td><td>'+f0(row.v)+'</td><td>'+row.ang.toFixed(2)+'°</td>';
+        frag.appendChild(tr); R+=st;
+      }
+      tb.appendChild(frag);
+      if(R<=b+1e-9){ $('dStatus').textContent='Building… '+f0(R)+' yd ('+Math.round(100*(R-a)/(b-a||1))+'%)'; setTimeout(chunk,0); }
+      else { const last=tableRows[tableRows.length-1]; building=false; $('tableBtn').disabled=false;
+        $('dStatus').textContent=(last&&last.end?'Stopped at '+f0(last.R)+' yd: beyond reach. ':'')+'Done: '+tableRows.filter(r=>!r.end).length+' rows. '+(to.label||'Untrued.'); }
+    };
+    setTimeout(chunk,20);
+  }catch(x){ building=false; $('tableBtn').disabled=false; fail(x); }
+}
+function tableText(sep){
+  const hdr=['Yards','Miles','Elevation MOA','Elevation mils','Windage MOA (+ = dial left)','Flight time s','Impact fps','Barrel angle above level (deg)'];
+  const lines=[hdr.join(sep)];
+  tableRows.filter(r=>!r.end).forEach(r=>lines.push([Math.round(r.R),r.mi.toFixed(3),nz(r.e,1).toFixed(1),nz(r.mil,2).toFixed(2),r.w.toFixed(1),r.t.toFixed(2),Math.round(r.v),r.ang.toFixed(2)].join(sep)));
+  return lines.join('\n');
+}
+function copyTable(){
+  if(!tableRows.length){ $('dStatus').textContent='Build the table first.'; return; }
+  const txt=tableText('\t');
+  const fallback=()=>{ const ta=document.createElement('textarea'); ta.value=txt; ta.setAttribute('readonly',''); ta.style.position='fixed'; ta.style.opacity='0'; document.body.appendChild(ta); ta.select(); ta.setSelectionRange(0,txt.length);
+    try{ document.execCommand('copy'); $('dStatus').textContent='Copied. Paste into Numbers, Google Sheets or Excel.'; }catch(e){ $('dStatus').textContent='Copy failed. Use Share or save CSV.'; } ta.remove(); };
+  if(navigator.clipboard&&navigator.clipboard.writeText) navigator.clipboard.writeText(txt).then(()=>$('dStatus').textContent='Copied. Paste into Numbers, Google Sheets or Excel.',fallback); else fallback();
+}
+// On iPhone the Share sheet is the reliable way to save a file (Save to Files, AirDrop, Messages, Mail).
+async function shareCSV(){
+  if(!tableRows.length){ $('dStatus').textContent='Build the table first.'; return; }
+  const name='dope-table.csv', blob=new Blob([tableText(',')],{type:'text/csv'});
+  try{
+    const file=new File([blob],name,{type:'text/csv'});
+    if(navigator.canShare && navigator.canShare({files:[file]})){ await navigator.share({files:[file],title:'Dope table'}); $('dStatus').textContent='Shared.'; return; }
+  }catch(e){ if(e && e.name==='AbortError') return; }
+  try{ const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=name; document.body.appendChild(a); a.click(); setTimeout(()=>{URL.revokeObjectURL(a.href); a.remove();},1500); $('dStatus').textContent='CSV saved.'; }
+  catch(e){ $('dStatus').textContent='Saving isn’t available here. Use Copy for Sheets.'; }
+}
+function saveProfile(){
+  err('');
+  try{ readInputs(); }catch(x){ fail(x); return; }   // make sure every needed box is filled in first
+  const cur=$('profile').value;
+  const suggest=cur==='__new__'?'':(store.profiles[cur]?cur:cur+' (my copy)');
+  let name=prompt('Name for this rifle setup:', suggest);
+  if(name===null) return; name=name.trim(); if(!name) return;
+  if(PRESETS[name]){ alert('That name belongs to a built-in rifle. Pick a different name.'); return; }
+  if(store.profiles[name] && name!==cur && !confirm('Replace your saved rifle "'+name+'"?')) return; const v=getForm(); delete v.dist; delete v.unit; delete v.profile; store.profiles[name]=v; fillProfiles(name); $('rStatus').textContent='Saved as "'+name+'".'; remember();
+}
+function delProfile(){
+  const n=$('profile').value;
+  if(n==='__new__'){ const tmp=$('profile').querySelector('option[value="__new__"]'); if(tmp) tmp.remove(); $('rStatus').textContent=''; setForm(allProfiles()[$('profile').value]); return; }
+  if(!store.profiles[n]){ alert('Built-in rifles can’t be deleted. Saved copies can.'); return; }
+  if(confirm('Delete "'+n+'"?')){ delete store.profiles[n]; fillProfiles(); setForm(allProfiles()[$('profile').value]); remember(); }
+}
+const RIFLE_FIELDS=['mv','bc','grains','diaIn','lenIn','shIn','zeroYd','twistIn'];
+function newRifle(){
+  err('');
+  RIFLE_FIELDS.forEach(f=>$(f).value='');
+  $('model').value='G7'; $('rightTwist').value='1';
+  state.trued=null; $('tMethod').value='none'; $('tDist').value=''; $('tMOA').value=''; showTrue();
+  const p=$('profile'); let o=p.querySelector('option[value="__new__"]');
+  if(!o){ o=document.createElement('option'); o.value='__new__'; o.textContent='New rifle (not saved yet)'; p.insertBefore(o,p.firstChild); }
+  p.value='__new__';
+  $('rStatus').textContent='Enter the new rifle\u2019s data below, then tap Save rifle at the top. Weather settings were kept.';
+  $('rifleBox').open=true; $('mv').focus(); $('rifleBox').scrollIntoView({behavior:'smooth',block:'start'});
+}
+function flipSign(id){ const el=$(id), s=el.value.trim(); if(!s||s==='0') return; el.value=(s[0]==='-'||s[0]==='\u2212')?s.slice(1):'-'+s; }
+function bind(id,fn){ $(id).addEventListener('click',fn); }
+
+// ---------- Start ----------
+loadStore(); fillProfiles();
+if(store.last){ fillProfiles(store.last.profile); setForm(store.last); if(store.last.dist) $('dist').value=store.last.dist; if(store.last.unit) $('unit').value=store.last.unit; }
+else setForm(PRESETS[$('profile').value]);
+$('profile').addEventListener('change',()=>{ const n=$('profile').value; if(n==='__new__') return; const tmp=$('profile').querySelector('option[value="__new__"]'); if(tmp) tmp.remove(); $('rStatus').textContent=''; setForm(allProfiles()[n]); remember(); });
+$('stdP').addEventListener('change',syncStdP); $('altFt').addEventListener('input',()=>{ if($('stdP').checked) syncStdP(); });
+$('dist').addEventListener('keydown',e=>{ if(e.key==='Enter') calc(); });
+document.querySelectorAll('[data-neg]').forEach(b=>b.addEventListener('click',()=>flipSign(b.dataset.neg)));
+bind('go',calc); bind('trueBtn',doTrue); bind('tableBtn',buildTable); bind('copyBtn',copyTable); bind('shareBtn',shareCSV); bind('saveBtn',saveProfile); bind('delBtn',delProfile); bind('newBtn',newRifle);
+
+// ---------- Offline support ----------
+(function(){
+  const box=$('offline');
+  const standalone=window.navigator.standalone===true || (window.matchMedia&&matchMedia('(display-mode: standalone)').matches);
+  const say=(t,ok)=>{ box.textContent=t; box.classList.toggle('ok',!!ok); };
+  if(!('serviceWorker' in navigator) || location.protocol.indexOf('http')!==0){
+    say('Not saved for offline use. Open this page from its web address (https), then add it to your Home Screen.'); return;
+  }
+  navigator.serviceWorker.register('sw.js').then(()=>navigator.serviceWorker.ready).then(()=>{
+    say(standalone ? 'Ready for offline use. This app works with no signal.'
+                   : 'Saved for offline use in Safari. For the best offline app: tap Share, then Add to Home Screen, then open it once from the icon while you have signal.', true);
+  }).catch(()=>say('Couldn’t save for offline use. Reopen the page while you have signal.'));
+})();
+
+</script>
+</body>
+</html>

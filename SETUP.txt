@@ -1,0 +1,85 @@
+ELR BALLISTICS: PUTTING IT ON YOUR iPHONE SO IT WORKS WITH NO SIGNAL
+=====================================================================
+
+Why this needs a one-time web address
+-------------------------------------
+An iPhone only keeps a web app working offline if it was first opened from a
+real web address (https). Opening index.html straight from the Files app won't
+run the calculator reliably and won't save it for offline use. So you put
+these files on a free website once. After that, the phone keeps its own copy
+and runs with no signal.
+
+The files (keep them together, don't rename them)
+-------------------------------------------------
+  index.html            the calculator
+  sw.js                 the part that saves the app on the phone for offline use
+  manifest.webmanifest  tells the iPhone the app's name and icon
+  icon-180.png, icon-192.png, icon-512.png   home-screen icon
+
+Step 1: Put the files on a free website (GitHub Pages, one time)
+----------------------------------------------------------------
+Easiest on a computer.
+ 1. Make a free account at github.com.
+ 2. Create a new repository named, for example, elr-ballistics. Make it Public.
+ 3. In the new repository choose "Add file", then "Upload files". Drag in all
+    six files above and commit them.
+ 4. Open the repository's Settings, then Pages. Under "Build and deployment"
+    pick "Deploy from a branch", choose the main branch and the / (root)
+    folder, and save.
+ 5. After a minute or two the page shows your address, something like:
+      https://YOUR-USERNAME.github.io/elr-ballistics/
+    Open it on a computer to check that the calculator loads.
+
+Any other free host that serves plain files over https works the same way.
+
+Step 2: Install it on the iPhone (needs signal, one time)
+---------------------------------------------------------
+ 1. On the iPhone, open that address in Safari.
+ 2. Tap the Share button, then "Add to Home Screen", then "Add".
+ 3. Open the app from the new home-screen icon while you still have signal.
+    Wait until the box at the very bottom of the app turns green and says
+    "Ready for offline use".
+
+Step 3: Test it before you go off grid
+--------------------------------------
+ 1. Turn on Airplane Mode.
+ 2. Close the app completely (swipe it away), then open it from the icon.
+ 3. Pick the .375 CheyTac preset, enter 2200 yards, and press Calculate.
+    You should see 53.5 MOA. If you do, it's ready for the field.
+
+Good to know
+------------
+ - Saved rifles and your last inputs are stored inside the home-screen app.
+   They are separate from Safari, so set up your rifles in the app itself.
+ - Leave the website up. The phone checks it now and then when it has signal.
+   If the site is deleted, the offline copy isn't guaranteed to stay.
+ - Keep the spreadsheet or a printed dope card as a backup. Deleting the app,
+   or the phone running very low on storage, can remove the offline copy.
+ - Updating the app later: upload the new files to the same repository, and
+   change the version number in sw.js (elr-ballistics-v2 to v3, and so on). Then open
+   the app twice with signal. The first opening downloads the update, and the
+   second shows it.
+ - A full table to 5 miles in 5-yd steps (1,741 rows) took about 13 seconds on
+   the test computer. The app shows its progress while it works.
+ - "Share or save CSV" opens the iPhone Share sheet, so you can Save to Files,
+   AirDrop, or send the table by Messages or Mail.
+
+Adding a new rifle
+------------------
+ 1. Tap "New rifle" at the top. The rifle and bullet boxes are cleared;
+    weather settings are kept.
+ 2. Fill in muzzle velocity, BC and BC type, bullet weight, diameter and
+    length, sight height, zero distance, and twist rate and direction.
+    If anything needed is missing, the app tells you which box and takes
+    you to it.
+ 3. Tap "Save rifle" and give it a name. It appears in the list marked
+    "(saved)". To change it later, edit the boxes and save again under the
+    same name. To discard an unsaved new rifle, tap Delete.
+
+Barrel angle column (dope table)
+--------------------------------
+Shows how far the bore points above level for each distance, including any
+uphill or downhill slope you entered. That's what an inclinometer reads on
+a surface parallel to the bore, such as the receiver. A tapered scope rail
+reads lower by the rail's built-in MOA (20 MOA = 0.33 degrees, 40 MOA =
+0.67 degrees).
